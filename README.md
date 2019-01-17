@@ -18,7 +18,7 @@ apply plugin: 'org.jetbrains.kotlin.multiplatform'
 apply plugin: 'com.alecstrong.cocoapods'
 
 // Optional configuration of plugin.
-sqldelight {
+cocoapods {
   version = "1.0.0-LOCAL" // Defaults to "1.0.0-LOCAL"
   homepage = www.mywebsite.com  // Default to empty
   deploymentTarget = "10.0" // Defaults to "10.0"
