@@ -34,7 +34,7 @@ From this the plugin will generate a task `generatePodspec` to create a `.podspe
 > Pods/Kotlin/gradlew -p Pods/Kotlin :common:generatePodspec
 ```
 
-(Above is assuming a module structure where `Pods/Kotlin` is the root of your gradle project, and `common` is a Kotlin Multiplatform module with iOS targets.
+The above command is assuming a module structure where `Code/Kotlin` is the root of your gradle project, and `common` is a Kotlin Multiplatform module with iOS targets.
 
 Then in your `Podfile` you can reference the module:
 
