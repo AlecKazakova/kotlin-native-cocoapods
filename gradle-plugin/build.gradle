@@ -1,0 +1,39 @@
+apply plugin: 'org.jetbrains.kotlin.jvm'
+apply plugin: 'java-gradle-plugin'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+gradlePlugin {
+  plugins {
+    sqlDelight {
+      id = 'com.alecstrong.cocoapods'
+      implementationClass = 'com.alecstrong.cocoapods.gradle.plugin.CocoapodsPlugin'
+    }
+  }
+}
+
+configurations {
+  fixtureClasspath
+}
+
+// Append any extra dependencies to the test fixtures via a custom configuration classpath. This
+// allows us to apply additional plugins in a fixture while still leveraging dependency resolution
+// and de-duplication semantics.
+tasks.getByName('pluginUnderTestMetadata').
+        getPluginClasspath().
+        from(configurations.fixtureClasspath)
+
+dependencies {
+  implementation deps.kotlin.stdlib.jdk
+  
+  compileOnly gradleApi()
+  compileOnly deps.plugins.kotlin
+
+  testImplementation deps.junit
+  testImplementation deps.truth
+
+  fixtureClasspath deps.plugins.kotlin
+}
+
+apply from: "$rootDir/gradle/gradle-mvn-push.gradle"

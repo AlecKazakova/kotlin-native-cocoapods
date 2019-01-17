@@ -1,0 +1,32 @@
+plugins {
+  id 'org.jetbrains.kotlin.multiplatform'
+  id 'com.alecstrong.cocoapods'
+}
+
+archivesBaseName = 'Sample'
+
+kotlin {
+  sourceSets {
+    commonMain {}
+    commonTest {}
+    iosMain {}
+    iosTest {}
+  }
+
+  targets {
+    fromPreset(presets.iosArm64, 'iosDevice') {
+      compilations.main.outputKinds('FRAMEWORK')
+    }
+    fromPreset(presets.iosX64, 'iosSim') {
+      compilations.main.outputKinds('FRAMEWORK')
+    }
+  }
+
+  configure([targets.iosSim, targets.iosDevice]) {
+    compilations.main.source(sourceSets.iosMain)
+    compilations.test.source(sourceSets.iosTest)
+    compilations.each {
+      it.extraOpts("-linker-options", "-lsqlite3")
+    }
+  }
+}
