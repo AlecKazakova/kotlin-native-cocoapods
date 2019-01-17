@@ -1,5 +1,4 @@
 # kotlin-native-cocoapods
-A gradle plugin for configuring Kotlin/Native with Cocoapods
 
 ### Setup
 
@@ -43,7 +42,7 @@ source 'https://git.sqcorp.co/scm/ios/cocoapodspecs.git'
 
 ...
 
-target 'Cash' do
+target 'MyProject' do
   ...
   pod 'common', :path => 'Code/Kotlin/common'
 end
