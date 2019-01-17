@@ -3,7 +3,6 @@ package com.alecstrong.cocoapods.gradle.plugin
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.jetbrains.kotlin.utils.fileUtils.descendantRelativeTo
 import java.io.File
 
 open class GeneratePodspecTask : DefaultTask() {
@@ -16,6 +15,7 @@ open class GeneratePodspecTask : DefaultTask() {
   var authors: String? = null
   var license: String? = null
   var summary: String? = null
+  var daemon: Boolean = false
 
   @TaskAction
   fun generatePodspec() {
@@ -52,7 +52,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |
       |  spec.prepare_command = <<-SCRIPT
       |    set -ev
-      |    $gradlew -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace
+      |    $gradlew ${if (daemon) "" else "--no-daemon" } -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace
       |  SCRIPT
       |
       |  spec.script_phases = [
@@ -65,7 +65,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |        set -ev
       |        REPO_ROOT=`realpath "${'$'}PODS_TARGET_SRCROOT"`
       |        rm -rf "${'$'}{REPO_ROOT}/#{spec.name}.framework"*
-      |        ${'$'}REPO_ROOT/$gradlew -P${CocoapodsPlugin.POD_FRAMEWORK_DIR_ENV}=`realpath "#{framework_dir}"` -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
+      |        ${'$'}REPO_ROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -P${CocoapodsPlugin.POD_FRAMEWORK_DIR_ENV}=`realpath "#{framework_dir}"` -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
       |      SCRIPT
       |    }
       |  ]

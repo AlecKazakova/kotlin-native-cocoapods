@@ -3,11 +3,8 @@ package com.alecstrong.cocoapods.gradle.plugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
@@ -16,7 +13,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 import org.jetbrains.kotlin.konan.target.Architecture
 import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.KonanTarget
-import org.jetbrains.kotlin.utils.ifEmpty
 import java.io.File
 
 open class CocoapodsPlugin : Plugin<Project> {
@@ -34,6 +30,7 @@ open class CocoapodsPlugin : Plugin<Project> {
         task.authors = extension.authors
         task.license = extension.license
         task.summary = extension.summary
+        task.daemon = extension.daemon
       }
 
       project.tasks.register("initializeFramework", InitializeFrameworkTask::class.java) { task ->

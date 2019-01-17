@@ -6,5 +6,6 @@ open class CocoapodsExtension(
   var deploymentTarget: String = "10.0",
   var authors: String? = null,
   var license: String? = null,
-  var summary: String? = null
+  var summary: String? = null,
+  var daemon: Boolean = false
 )
