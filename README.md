@@ -31,7 +31,7 @@ cocoapods {
 From this the plugin will generate a task `generatePodspec` to create a `.podspec` file in that directory for the kotlin native project.
 
 ```
-> Pods/Kotlin/gradlew -p Pods/Kotlin :common:generatePodspec
+> Code/Kotlin/gradlew -p Code/Kotlin :common:generatePodspec
 ```
 
 The above command is assuming a module structure where `Code/Kotlin` is the root of your gradle project, and `common` is a Kotlin Multiplatform module with iOS targets.
