@@ -1,6 +1,6 @@
 # kotlin-native-cocoapods
 
-A Gradle plugin which handles creating a podspec for a local Kotlin/Native project. The generated podspec properly integrates your project with cocoapods, and release/debug fat binaries will be created and linked when you compile the xcode project. Using this plugin means you do not need to manually set up xcode or the `copyFramework` task as described in the [documentation](https://kotlinlang.org/docs/tutorials/native/mpp-ios-android.html#creating-ios-application).
+A Gradle plugin which handles creating a podspec for a local Kotlin/Native project. The generated podspec properly integrates your project with cocoapods, and release/debug fat binaries will be created and linked when you compile the xcode project. Using this plugin means you do not need to manually set up xcode or the `packForXcode` task as described in the [documentation](https://kotlinlang.org/docs/tutorials/native/mpp-ios-android.html#creating-ios-application).
 
 ### Setup
 
