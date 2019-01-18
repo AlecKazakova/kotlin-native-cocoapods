@@ -48,8 +48,6 @@ open class GeneratePodspecTask : DefaultTask() {
       |  preserve_path_patterns = ['*.gradle', 'gradle*', '*.properties', 'src/**/*.*']
       |  spec.preserve_paths = preserve_path_patterns + ['src/**/*'] # also include empty dirs for full hierarchy
       |
-      |  framework_loc = '${'$'}{PODS_TARGET_SRCROOT}/${project.buildDir.name}'
-      |
       |  spec.prepare_command = <<-SCRIPT
       |    set -ev
       |    $gradlew ${if (daemon) "" else "--no-daemon" } -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace
