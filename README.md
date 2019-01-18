@@ -24,6 +24,7 @@ cocoapods {
   authors = "Ben Asher" // Defaults to empty
   license = "..." // Defaults to empty
   summary = "..." // Defaults to empty
+  daemon = true // Defaults to false
 }
 ```
 
