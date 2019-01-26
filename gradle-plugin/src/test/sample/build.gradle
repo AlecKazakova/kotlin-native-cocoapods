@@ -14,10 +14,10 @@ kotlin {
   }
 
   targets {
-    fromPreset(presets.iosArm64, 'iosDevice') {
+    targetFromPreset(presets.iosArm64, 'iosDevice') {
       compilations.main.outputKinds('FRAMEWORK')
     }
-    fromPreset(presets.iosX64, 'iosSim') {
+    targetFromPreset(presets.iosX64, 'iosSim') {
       compilations.main.outputKinds('FRAMEWORK')
     }
   }

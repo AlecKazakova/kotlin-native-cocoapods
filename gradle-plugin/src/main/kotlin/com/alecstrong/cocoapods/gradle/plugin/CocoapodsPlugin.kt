@@ -8,8 +8,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeOutputKind
-import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.Architecture
 import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.KonanTarget
@@ -45,23 +44,30 @@ open class CocoapodsPlugin : Plugin<Project> {
   private fun createFatFrameworkTasks(project: Project) {
     val mppExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
 
+    println("AHHHH")
+
     mppExtension.targets
         .flatMap { target ->
           target.compilations
               .filterIsInstance<KotlinNativeCompilation>()
               .filter { !it.isTestCompilation }
-              .map { it to (target.component.target as KotlinNativeTarget) }
+              .flatMap { compilation ->
+                target.components.flatMap { component ->
+                  (component.target as KotlinNativeTarget).binaries.map { binary ->
+                    println("GOT BINARY with output kind ${binary.outputKind}")
+                    compilation to binary
+                  }
+                }
+              }
         }
-        .filter { (_, component) ->
-          component.konanTarget.family == Family.IOS
+        .filter { (_, binary) ->
+          binary.target.konanTarget.family == Family.IOS
         }
-        .flatMap { (compilation, component) ->
-          component.konanTarget.architecture
+        .flatMap { (compilation, binary) ->
           compilation.buildTypes.map { buildType ->
             Configuration(
                 buildType = buildType,
-                target = component.konanTarget,
-                linkTask = compilation.linkTaskName(NativeOutputKind.FRAMEWORK, buildType)
+                linkTask = binary.linkTask
             )
           }
         }
@@ -110,8 +116,9 @@ open class CocoapodsPlugin : Plugin<Project> {
 
           val args = mutableListOf("-create")
 
-          configurations.forEach { (_, target, linkTaskName) ->
-            val output = (project.tasks.getByName(linkTaskName) as KotlinNativeCompile).outputFile.get().parentFile.absolutePath
+          configurations.forEach { (_, linkTask) ->
+            val output = linkTask.outputFile.get().parentFile.absolutePath
+            val target = linkTask.compilation.target.konanTarget
             if (target.architecture == Architecture.ARM64) {
               deviceParentDir = output
             }
@@ -163,8 +170,7 @@ open class CocoapodsPlugin : Plugin<Project> {
 
   private data class Configuration(
     val buildType: NativeBuildType,
-    val target: KonanTarget,
-    val linkTask: String
+    val linkTask: KotlinNativeLink
   )
 
   private fun KonanTarget.architecture() = when (this) {

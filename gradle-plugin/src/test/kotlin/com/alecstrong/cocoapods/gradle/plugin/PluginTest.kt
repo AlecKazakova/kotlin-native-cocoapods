@@ -2,8 +2,6 @@ package com.alecstrong.cocoapods.gradle.plugin
 
 import com.google.common.truth.Truth.assertThat
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import java.io.File
 
@@ -34,11 +32,8 @@ class PluginTest {
         .withPluginClasspath()
 
 
-    val framework = File(fixtureRoot, "build/sample.framework")
-    val dsym = File(fixtureRoot, "build/sample.framework.dSYM")
-
-    assertThat(framework.exists()).isFalse()
-    assertThat(dsym.exists()).isFalse()
+    val framework = File(fixtureRoot, "build/sample.framework").apply { deleteRecursively() }
+    val dsym = File(fixtureRoot, "build/sample.framework.dSYM").apply { deleteRecursively() }
 
     runner.withArguments(
         "-P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=$fixtureName.framework", "initializeFramework", "--stacktrace"
@@ -59,11 +54,8 @@ class PluginTest {
         .withProjectDir(fixtureRoot)
         .withPluginClasspath()
 
-    val framework = File(fixtureRoot, "build/sample.framework")
-    val dsym = File(fixtureRoot, "build/sample.framework.dSYM")
-
-    assertThat(framework.exists()).isFalse()
-    assertThat(dsym.exists()).isFalse()
+    val framework = File(fixtureRoot, "build/sample.framework").apply { deleteRecursively() }
+    val dsym = File(fixtureRoot, "build/sample.framework.dSYM").apply { deleteRecursively() }
 
     runner.withArguments(
         "-P${CocoapodsPlugin.POD_FRAMEWORK_DIR_ENV}=${fixtureRoot.absolutePath}/build", "createIosDebugArtifacts", "--stacktrace"
