@@ -44,8 +44,6 @@ open class CocoapodsPlugin : Plugin<Project> {
   private fun createFatFrameworkTasks(project: Project) {
     val mppExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
 
-    println("AHHHH")
-
     mppExtension.targets
         .flatMap { target ->
           target.compilations
@@ -54,7 +52,6 @@ open class CocoapodsPlugin : Plugin<Project> {
               .flatMap { compilation ->
                 target.components.flatMap { component ->
                   (component.target as KotlinNativeTarget).binaries.map { binary ->
-                    println("GOT BINARY with output kind ${binary.outputKind}")
                     compilation to binary
                   }
                 }
