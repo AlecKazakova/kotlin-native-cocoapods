@@ -33,8 +33,6 @@ open class GeneratePodspecTask : DefaultTask() {
 
     File(project.projectDir, "${project.name}.podspec").writeText("""
       |Pod::Spec.new do |spec|
-      |  framework_dir = "${'$'}{PODS_TARGET_SRCROOT}/${project.buildDir.name}"
-      |
       |  spec.name                     = '${project.name}'
       |  spec.version                  = '$version'
       |  ${if (homepage != null) "spec.homepage                 = '$homepage'" else "# homepage can be provided from gradle"}
@@ -45,9 +43,6 @@ open class GeneratePodspecTask : DefaultTask() {
       |  ${if (summary != null) "spec.summary                  = '$summary'" else "# summary can be provided from gradle"}
       |  spec.ios.vendored_frameworks  = "${project.buildDir.name}/#{spec.name}.framework"
       |
-      |  preserve_path_patterns = ['*.gradle', 'gradle*', '*.properties', 'src/**/*.*']
-      |  spec.preserve_paths = preserve_path_patterns + ['src/**/*'] # also include empty dirs for full hierarchy
-      |
       |  spec.prepare_command = <<-SCRIPT
       |    set -ev
       |    $gradlew ${if (daemon) "" else "--no-daemon" } -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace
@@ -56,14 +51,12 @@ open class GeneratePodspecTask : DefaultTask() {
       |  spec.script_phases = [
       |    {
       |      :name => 'Build ${project.name}',
-      |      :input_files => Dir.glob(preserve_path_patterns).map {|f| "${'$'}(PODS_TARGET_SRCROOT)/#{f}"},
-      |      :output_files => ["#{framework_dir}/#{spec.name}.framework", "#{framework_dir}/#{spec.name}.dSYM"],
       |      :shell_path => '/bin/sh',
       |      :script => <<-SCRIPT
       |        set -ev
       |        REPO_ROOT=`realpath "${'$'}PODS_TARGET_SRCROOT"`
       |        rm -rf "${'$'}{REPO_ROOT}/#{spec.name}.framework"*
-      |        ${'$'}REPO_ROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -P${CocoapodsPlugin.POD_FRAMEWORK_DIR_ENV}=`realpath "#{framework_dir}"` -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
+      |        ${'$'}REPO_ROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
       |      SCRIPT
       |    }
       |  ]

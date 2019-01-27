@@ -53,18 +53,40 @@ class PluginTest {
     val runner = GradleRunner.create()
         .withProjectDir(fixtureRoot)
         .withPluginClasspath()
+        .forwardOutput()
 
     val framework = File(fixtureRoot, "build/sample.framework").apply { deleteRecursively() }
     val dsym = File(fixtureRoot, "build/sample.framework.dSYM").apply { deleteRecursively() }
 
-    runner.withArguments(
-        "-P${CocoapodsPlugin.POD_FRAMEWORK_DIR_ENV}=${fixtureRoot.absolutePath}/build", "createIosDebugArtifacts", "--stacktrace"
-    ).build()
+    runner.withArguments("createIosDebugArtifacts", "--stacktrace", "--info").build()
 
     assertThat(framework.exists()).isTrue()
     assertThat(dsym.exists()).isTrue()
 
+    val plist = File(framework, "Info.plist")
+    assertThat(plist.exists()).isTrue()
+
+    assertThat(plist.readText()).apply {
+      contains("iPhoneSimulator")
+      contains("iPhoneOS")
+    }
+
     framework.deleteRecursively()
     dsym.deleteRecursively()
+  }
+
+  @Test
+  fun `run iosTest`() {
+    val fixtureName = "sample"
+    val fixtureRoot = File("src/test/$fixtureName")
+    val runner = GradleRunner.create()
+        .withProjectDir(fixtureRoot)
+        .withPluginClasspath()
+        .forwardOutput()
+
+    val result = runner.withArguments("iosTest", "--stacktrace", "--info").build()
+
+    assertThat(result.output)
+        .contains("[  PASSED  ] 1 tests.")
   }
 }
