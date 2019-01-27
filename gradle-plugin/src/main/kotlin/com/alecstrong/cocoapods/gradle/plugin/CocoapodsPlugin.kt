@@ -1,5 +1,6 @@
 package com.alecstrong.cocoapods.gradle.plugin
 
+import groovy.lang.Closure
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -9,8 +10,22 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.NativeOutputKind
 open class CocoapodsPlugin : Plugin<Project> {
   override fun apply(project: Project) {
     val extension = project.extensions.create("cocoapods", CocoapodsExtension::class.java)
+    val mppExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
 
-    project.extensions.add("cocoapodsPreset", CocoapodsTargetPreset(project))
+    project.extensions.add("targetForCocoapods", object : Closure<Unit>(extension) {
+      override fun call(vararg args: Any) {
+        val name = args[0] as? String
+            ?: throw IllegalArgumentException("Expected string for first argument to targetForCocoapods")
+        val closure: Closure<*>? = when {
+          args.size == 2 -> args[1] as? Closure<*>
+              ?: throw IllegalArgumentException("Expected closure for second argument to targetForCocoapods")
+          args.size > 2 -> throw IllegalArgumentException("Expected two arguments to targetForCocoapods")
+          else -> null
+        }
+        val preset = CocoapodsTargetPreset(project, closure)
+        mppExtension.targetFromPreset(preset, name)
+      }
+    })
 
     project.afterEvaluate {
       project.tasks.register("generatePodspec", GeneratePodspecTask::class.java) { task ->
@@ -31,7 +46,6 @@ open class CocoapodsPlugin : Plugin<Project> {
         task.description = "Create a dummy dynamic framework to be used during Cocoapods installation"
       }
 
-      val mppExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
       mppExtension.targets
           .filterIsInstance<KotlinNativeTarget>()
           .flatMap { it.binaries }

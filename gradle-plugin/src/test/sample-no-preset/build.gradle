@@ -1,0 +1,32 @@
+plugins {
+  id 'org.jetbrains.kotlin.multiplatform'
+  id 'com.alecstrong.cocoapods'
+}
+
+archivesBaseName = 'Sample'
+
+repositories {
+  mavenCentral()
+}
+
+kotlin {
+  sourceSets {
+    commonMain {}
+    iosMain {}
+  }
+
+  targetFromPreset(presets.iosArm64, 'iosDevice') {
+    binaries {
+      framework()
+    }
+  }
+  targetFromPreset(presets.iosX64, 'iosSimulator') {
+    binaries {
+      framework()
+    }
+  }
+  
+  configure([targets.iosDevice, targets.iosSimulator]) {
+    compilations.main.source(sourceSets.iosMain)
+  }
+}
