@@ -52,3 +52,22 @@ end
 ```
 
 And that's it! From your iOS project you will be able to `import common`.
+
+### Custom Preset
+
+The plugin also includes a custom preset which sets up the necessary x64/arm64 source sets:
+
+```groovy
+kotlin {
+  targets {
+    targetFromPreset(cocoapodsPreset, 'ios')
+  }
+  
+  sourceSets {
+    iosMain { ... }
+    iosTest { ... }
+  }
+}
+```
+
+Doing this will also generate a `iosTest` task for running tests against this target.
