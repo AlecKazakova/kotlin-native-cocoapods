@@ -39,7 +39,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |  spec.source                   = { :git => "Not Published", :tag => "Cocoapods/#{spec.name}/#{spec.version}" }
       |  spec.ios.deployment_target    = '$deploymentTarget'
       |  ${if (authors != null) "spec.authors                  = '$authors'" else "# authors can be provided from gradle"}
-      |  ${if (license != null) "spec.license                  = $license" else "# license can be provided from gradle"}
+      |  ${if (license != null) "spec.license                  = '$license'" else "# license can be provided from gradle"}
       |  ${if (summary != null) "spec.summary                  = '$summary'" else "# summary can be provided from gradle"}
       |  spec.ios.vendored_frameworks  = "${project.buildDir.name}/#{spec.name}.framework"
       |
