@@ -10,7 +10,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.alecstrong:cocoapods-gradle-plugin:0.1.0'
+    classpath 'com.alecstrong:cocoapods-gradle-plugin:0.2.0'
   }
 }
 
