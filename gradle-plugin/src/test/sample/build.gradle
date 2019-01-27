@@ -24,7 +24,5 @@ kotlin {
     iosTest {}
   }
 
-  targets {
-    targetFromPreset(cocoapodsPreset, 'ios')
-  }
+  targetForCocoapods('ios')
 }

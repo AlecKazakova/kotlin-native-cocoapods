@@ -1,22 +1,26 @@
 package com.alecstrong.cocoapods.gradle.plugin
 
+import groovy.lang.Closure
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
+import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeOutputKind.EXECUTABLE
 
 class CocoapodsTargetPreset(
-  private val project: Project
+  private val project: Project,
+  private val configure: Closure<*>?
 ) : KotlinTargetPreset<KotlinNativeTarget> {
   override fun createTarget(name: String): KotlinNativeTarget {
     val extension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
     val simulator = (extension.targetFromPreset(
         extension.presets.getByName("iosX64"), name
-    ) as KotlinNativeTarget).apply {
+    ) as KotlinNativeTarget).configureTarget {
       binaries {
         framework()
       }
@@ -24,7 +28,7 @@ class CocoapodsTargetPreset(
 
     val device = (extension.targetFromPreset(
         extension.presets.getByName("iosArm64"), "${name}Device"
-    ) as KotlinNativeTarget).apply {
+    ) as KotlinNativeTarget).configureTarget {
       binaries {
         framework {
           embedBitcode("disable")
@@ -45,6 +49,17 @@ class CocoapodsTargetPreset(
   }
 
   override fun getName() = "Cocoapods"
+
+  private fun KotlinNativeTarget.configureTarget(
+    defaultBinaries: KotlinNativeTarget.() -> Unit
+  ): KotlinNativeTarget {
+    ConfigureUtil.configure(configure, this)
+    if (binaries.findFramework(NativeBuildType.DEBUG) == null ||
+        binaries.findFramework(NativeBuildType.RELEASE) == null) {
+      defaultBinaries()
+    }
+    return this
+  }
 
   private fun configureSources(name: String, compilations: NamedDomainObjectContainer<KotlinNativeCompilation>) {
     val extension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
