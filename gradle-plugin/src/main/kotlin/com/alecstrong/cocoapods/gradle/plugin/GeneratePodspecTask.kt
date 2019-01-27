@@ -55,7 +55,6 @@ open class GeneratePodspecTask : DefaultTask() {
       |      :script => <<-SCRIPT
       |        set -ev
       |        REPO_ROOT=`realpath "${'$'}PODS_TARGET_SRCROOT"`
-      |        rm -rf "${'$'}{REPO_ROOT}/#{spec.name}.framework"*
       |        ${'$'}REPO_ROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
       |      SCRIPT
       |    }
