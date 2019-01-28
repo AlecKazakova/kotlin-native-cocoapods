@@ -11,6 +11,6 @@ internal fun NativeBuildType.name() = when (this) {
 internal fun KonanTarget.architecture() = when (this) {
   is KonanTarget.IOS_X64 -> "x86_64"
   is KonanTarget.IOS_ARM64 -> "arm64"
-  is KonanTarget.IOS_ARM32 -> "arm32"
+  is KonanTarget.IOS_ARM32 -> "armv7"
   else -> throw IllegalStateException("Cannot collapse non-ios target $this into descriptor.")
 }

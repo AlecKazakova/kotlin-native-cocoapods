@@ -26,17 +26,20 @@ class CocoapodsTargetPreset(
       }
     }
 
-    val device = (extension.targetFromPreset(
-        extension.presets.getByName("iosArm64"), "${name}Device"
-    ) as KotlinNativeTarget).configureTarget {
-      binaries {
-        framework {
-          embedBitcode("disable")
+    val validArchitectures = listOf("iosArm32", "iosArm64")
+
+    validArchitectures.forEach { architecture ->
+      val target = (extension.targetFromPreset(
+              extension.presets.getByName(architecture), architecture
+      ) as KotlinNativeTarget).configureTarget {
+        binaries {
+          framework {
+            embedBitcode("disable")
+          }
         }
       }
+      configureSources(name, target.compilations)
     }
-
-    configureSources(name, device.compilations)
 
     project.tasks.register("${name}Test", CocoapodsTestTask::class.java) { task ->
       task.dependsOn(simulator.compilations.getByName("test").getLinkTask(EXECUTABLE, DEBUG))

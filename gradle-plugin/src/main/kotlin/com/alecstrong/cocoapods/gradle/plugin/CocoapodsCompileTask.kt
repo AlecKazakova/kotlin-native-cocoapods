@@ -21,10 +21,14 @@ open class CocoapodsCompileTask : DefaultTask() {
 
   @TaskAction
   fun compileFatDsym() {
-    compileFatBinary(
-        binaryPath = "Contents/Resources/DWARF/${project.name}",
-        bundleName = "${project.name}.framework.dSYM"
-    )
+    // dsyms are not created for release builds, yet
+    // https://github.com/JetBrains/kotlin-native/issues/2422
+    if (buildType != NativeBuildType.RELEASE) {
+      compileFatBinary(
+              binaryPath = "Contents/Resources/DWARF/${project.name}",
+              bundleName = "${project.name}.framework.dSYM"
+      )
+    }
   }
 
   private fun compileFatBinary(
