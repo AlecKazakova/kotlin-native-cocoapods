@@ -22,7 +22,9 @@ class CocoapodsTargetPreset(
         extension.presets.getByName("iosX64"), name
     ) as KotlinNativeTarget).configureTarget {
       binaries {
-        framework()
+        framework {
+          embedBitcode("disable")
+        }
       }
     }
 
@@ -33,9 +35,7 @@ class CocoapodsTargetPreset(
               extension.presets.getByName(architecture), architecture
       ) as KotlinNativeTarget).configureTarget {
         binaries {
-          framework {
-            embedBitcode("disable")
-          }
+          framework()
         }
       }
       configureSources(name, target.compilations)
