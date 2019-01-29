@@ -32,6 +32,9 @@ open class GeneratePodspecTask : DefaultTask() {
     }
 
     File(project.projectDir, "${project.name}.podspec").writeText("""
+      |#
+      |# This file is generated via ./gradlew generatePodspec
+      |#
       |Pod::Spec.new do |spec|
       |  spec.name                     = '${project.name}'
       |  spec.version                  = '$version'
@@ -54,8 +57,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |      :shell_path => '/bin/sh',
       |      :script => <<-SCRIPT
       |        set -ev
-      |        REPO_ROOT=`realpath "${'$'}PODS_TARGET_SRCROOT"`
-      |        ${'$'}REPO_ROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}REPO_ROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
+      |        ${'$'}PODS_TARGET_SRCROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}PODS_TARGET_SRCROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
       |      SCRIPT
       |    }
       |  ]
