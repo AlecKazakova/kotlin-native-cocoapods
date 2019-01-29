@@ -59,9 +59,7 @@ The plugin also includes a custom preset which sets up the necessary x64/arm64 s
 
 ```groovy
 kotlin {
-  targets {
-    targetFromPreset(cocoapodsPreset, 'ios')
-  }
+  targetForCocoapods('ios')
   
   sourceSets {
     iosMain { ... }
@@ -71,3 +69,24 @@ kotlin {
 ```
 
 Doing this will also generate a `iosTest` task for running tests against this target.
+
+### Custom architectures
+
+By default this packages a fat binary with x64, arm64, and arm32 architectures inside. To override this behavior pass a list of presets into the `targetForCocoapods` method:
+
+```groovy
+kotlin {
+  targetForCocoapods([presets.iosArm64, iosX64], 'ios')
+}
+```
+
+Its also possible to use the full 1.3.20 DSL to customize the targets:
+
+
+```groovy
+kotlin {
+  targetForCocoapods([presets.iosArm64, iosX64], 'ios') {
+    compilations.main.extraOpts '-module-name', 'CP'
+  }
+}
+```
