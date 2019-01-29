@@ -10,7 +10,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.alecstrong:cocoapods-gradle-plugin:0.2.0'
+    classpath 'com.alecstrong:cocoapods-gradle-plugin:0.3.0'
   }
 }
 
@@ -70,7 +70,7 @@ kotlin {
 
 Doing this will also generate a `iosTest` task for running tests against this target.
 
-### Custom architectures
+### Custom Architectures
 
 By default this packages a fat binary with x64, arm64, and arm32 architectures inside. To override this behavior pass a list of presets into the `targetForCocoapods` method:
 
