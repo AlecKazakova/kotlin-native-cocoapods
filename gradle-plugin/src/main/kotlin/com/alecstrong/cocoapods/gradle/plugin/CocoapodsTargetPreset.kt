@@ -5,12 +5,16 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinTargetPreset
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCompilation
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType.DEBUG
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeOutputKind.EXECUTABLE
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM32
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM64
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_X64
 
 class CocoapodsTargetPreset(
   private val project: Project,
@@ -18,48 +22,55 @@ class CocoapodsTargetPreset(
 ) : KotlinTargetPreset<KotlinNativeTarget> {
   override fun createTarget(name: String): KotlinNativeTarget {
     val extension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
-    val simulator = (extension.targetFromPreset(
-        extension.presets.getByName("iosX64"), name
-    ) as KotlinNativeTarget).configureTarget {
-      binaries {
-        framework {
-          embedBitcode("disable")
-        }
+    val cocoapodsExtension = project.extensions.getByType(CocoapodsExtension::class.java)
+
+    val targets = cocoapodsExtension.architectures.mapIndexed { index, architecture ->
+      val target = extension.targetFromPreset(
+              extension.presets.getByName(architecture), if (index == 0) name else architecture
+      ).configureTarget()
+      if (index > 0) configureSources(name, target.compilations)
+      return@mapIndexed target
+    }
+
+    val simulator = targets.find { it.konanTarget == IOS_X64 }
+
+    if (simulator != null) {
+      project.tasks.register("${name}Test", CocoapodsTestTask::class.java) { task ->
+        task.dependsOn(simulator.compilations.getByName("test").getLinkTask(EXECUTABLE, DEBUG))
+        task.group = CocoapodsPlugin.GROUP
+        task.description = "Run tests for target '$name' on an iOS Simulator"
+        task.target = simulator
       }
+    } else {
+      project.logger.warn("No architecture provided for framework to be run on a simulator." +
+          " This means no test task was added.")
     }
 
-    val validArchitectures = listOf("iosArm32", "iosArm64")
-
-    validArchitectures.forEach { architecture ->
-      val target = (extension.targetFromPreset(
-              extension.presets.getByName(architecture), architecture
-      ) as KotlinNativeTarget).configureTarget {
-        binaries {
-          framework()
-        }
-      }
-      configureSources(name, target.compilations)
-    }
-
-    project.tasks.register("${name}Test", CocoapodsTestTask::class.java) { task ->
-      task.dependsOn(simulator.compilations.getByName("test").getLinkTask(EXECUTABLE, DEBUG))
-      task.group = CocoapodsPlugin.GROUP
-      task.description = "Run tests for target '$name' on an iOS Simulator"
-      task.target = simulator
-    }
-
-    return simulator
+    return targets.first()
   }
 
   override fun getName() = "Cocoapods"
 
-  private fun KotlinNativeTarget.configureTarget(
-    defaultBinaries: KotlinNativeTarget.() -> Unit
-  ): KotlinNativeTarget {
+  private fun KotlinTarget.configureTarget(): KotlinNativeTarget {
+    if (this !is KotlinNativeTarget) throw kotlin.IllegalStateException()
     ConfigureUtil.configure(configure, this)
     if (binaries.findFramework(NativeBuildType.DEBUG) == null ||
         binaries.findFramework(NativeBuildType.RELEASE) == null) {
-      defaultBinaries()
+      when (konanTarget) {
+        IOS_ARM32, IOS_ARM64 -> {
+          binaries {
+            framework()
+          }
+        }
+        IOS_X64 -> {
+          binaries {
+            framework {
+              embedBitcode("disable")
+            }
+          }
+        }
+        else -> throw IllegalStateException("Unsupported target $konanTarget")
+      }
     }
     return this
   }

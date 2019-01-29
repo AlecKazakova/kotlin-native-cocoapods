@@ -1,0 +1,23 @@
+plugins {
+  id 'org.jetbrains.kotlin.multiplatform'
+  id 'com.alecstrong.cocoapods'
+}
+
+archivesBaseName = 'Sample'
+
+repositories {
+  mavenCentral()
+}
+
+cocoapods {
+  architectures = ["iosArm64"]
+}
+
+kotlin {
+  sourceSets {
+    commonMain {}
+    iosMain {}
+  }
+
+  targetForCocoapods('ios')
+}

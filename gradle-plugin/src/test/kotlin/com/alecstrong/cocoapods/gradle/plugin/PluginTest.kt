@@ -98,6 +98,7 @@ class PluginTest {
     assertThat(plist.readText()).apply {
       contains("iPhoneSimulator")
       contains("iPhoneOS")
+      doesNotContain("UIRequiredDeviceCapabilities")
     }
 
     framework.deleteRecursively()
@@ -117,5 +118,24 @@ class PluginTest {
 
     assertThat(result.output)
         .contains("[  PASSED  ] 1 tests.")
+  }
+
+  @Test
+  fun `build with no simulator warns`() {
+    val fixtureName = "sample-no-simulator"
+    val fixtureRoot = File("src/test/$fixtureName")
+    val runner = GradleRunner.create()
+        .withProjectDir(fixtureRoot)
+        .withPluginClasspath()
+        .forwardOutput()
+
+    runner.withArguments("tasks", "--stacktrace", "--info")
+        .build()
+        .output
+        .let { output ->
+          assertThat(output).doesNotContain("iosTest ")
+          assertThat(output).contains("No architecture provided for framework to be run on a simulator." +
+              " This means no test task was added.")
+        }
   }
 }

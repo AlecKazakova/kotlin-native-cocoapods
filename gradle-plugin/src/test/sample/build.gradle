@@ -11,6 +11,10 @@ repositories {
   mavenCentral()
 }
 
+cocoapods {
+  architectures = ["iosArm64", "iosX64"]
+}
+
 kotlin {
   sourceSets {
     commonMain {}
