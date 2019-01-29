@@ -18,16 +18,14 @@ import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_X64
 
 class CocoapodsTargetPreset(
   private val project: Project,
-  private val configure: Closure<*>?
+  private val configure: Closure<*>?,
+  private val presets: List<KotlinTargetPreset<*>>
 ) : KotlinTargetPreset<KotlinNativeTarget> {
   override fun createTarget(name: String): KotlinNativeTarget {
     val extension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
-    val cocoapodsExtension = project.extensions.getByType(CocoapodsExtension::class.java)
 
-    val targets = cocoapodsExtension.architectures.mapIndexed { index, architecture ->
-      val target = extension.targetFromPreset(
-              extension.presets.getByName(architecture), if (index == 0) name else architecture
-      ).configureTarget()
+    val targets = presets.mapIndexed { index, preset ->
+      val target = extension.targetFromPreset(preset, if (index == 0) name else preset.name).configureTarget()
       if (index > 0) configureSources(name, target.compilations)
       return@mapIndexed target
     }

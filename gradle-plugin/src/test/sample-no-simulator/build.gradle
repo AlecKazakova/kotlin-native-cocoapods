@@ -9,15 +9,11 @@ repositories {
   mavenCentral()
 }
 
-cocoapods {
-  architectures = ["iosArm64"]
-}
-
 kotlin {
   sourceSets {
     commonMain {}
     iosMain {}
   }
 
-  targetForCocoapods('ios')
+  targetForCocoapods([presets.iosArm64], 'ios')
 }

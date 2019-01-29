@@ -7,6 +7,5 @@ open class CocoapodsExtension(
   var authors: String? = null,
   var license: String? = null,
   var summary: String? = null,
-  var daemon: Boolean = false,
-  var architectures: List<String> = listOf("iosArm32", "iosArm64", "iosX64")
+  var daemon: Boolean = false
 )
