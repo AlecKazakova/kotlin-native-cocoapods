@@ -5,6 +5,10 @@ import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.Architecture
+import org.jetbrains.kotlin.konan.target.KonanTarget
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM32
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM64
+import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_X64
 import java.io.File
 
 open class CocoapodsCompileTask : DefaultTask() {
@@ -63,20 +67,21 @@ open class CocoapodsCompileTask : DefaultTask() {
 
       exec.executable = "lipo"
       exec.args = args
-      exec.isIgnoreExitValue = true
-    }
+    }.rethrowFailure().assertNormalExitValue()
 
     if (deviceParentDir == null) {
       throw IllegalStateException("You need to have a compilation target for X64")
     }
 
     val initialContainer = "$deviceParentDir/$bundleName"
-    project.copy { copy ->
+    val copyResult = project.copy { copy ->
       copy.from(initialContainer) { from ->
         from.exclude(binaryPath)
       }
       copy.into(finalContainerPath)
     }
+
+    if (!copyResult.didWork) throw IllegalStateException("Failed to copy framework.")
 
     // clean plist (only works for frameworks)
     val plistPath = "$finalContainerPath/Info.plist"
@@ -84,14 +89,27 @@ open class CocoapodsCompileTask : DefaultTask() {
       project.exec { exec ->
         exec.executable = "/usr/libexec/PlistBuddy"
         exec.args = listOf("-c", "Delete :UIRequiredDeviceCapabilities", plistPath)
-        exec.isIgnoreExitValue = true
-      }
+      }.rethrowFailure().assertNormalExitValue().exitValue
 
+      // Clear supported platforms
       project.exec { exec ->
         exec.executable = "/usr/libexec/PlistBuddy"
-        exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:1 string iPhoneSimulator", plistPath)
-        exec.isIgnoreExitValue = true
-      }
+        exec.args = listOf("-c", "Delete :CFBundleSupportedPlatforms:0", plistPath)
+      }.rethrowFailure().assertNormalExitValue()
+
+      compilations.map { it.binary.target.konanTarget.supportedPlatform() }.distinct()
+          .forEachIndexed { index, platform ->
+            project.exec { exec ->
+              exec.executable = "/usr/libexec/PlistBuddy"
+              exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:$index string $platform", plistPath)
+            }.rethrowFailure().assertNormalExitValue()
+          }
     }
+  }
+
+  private fun KonanTarget.supportedPlatform(): String = when (this) {
+    IOS_X64 -> "iPhoneOS"
+    IOS_ARM64, IOS_ARM32 -> "iPhoneSimulator"
+    else -> throw AssertionError()
   }
 }

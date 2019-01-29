@@ -1,6 +1,7 @@
 package com.alecstrong.cocoapods.gradle.plugin
 
 import groovy.lang.Closure
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -12,8 +13,11 @@ open class CocoapodsPlugin : Plugin<Project> {
     val extension = project.extensions.create("cocoapods", CocoapodsExtension::class.java)
     val mppExtension = project.extensions.getByType(KotlinMultiplatformExtension::class.java)
 
+    var architectures: List<String>? = null
+
     project.extensions.add("targetForCocoapods", object : Closure<Unit>(extension) {
       override fun call(vararg args: Any) {
+        architectures = extension.architectures
         val name = args[0] as? String
             ?: throw IllegalArgumentException("Expected string for first argument to targetForCocoapods")
         val closure: Closure<*>? = when {
@@ -28,6 +32,21 @@ open class CocoapodsPlugin : Plugin<Project> {
     })
 
     project.afterEvaluate {
+      if (architectures != null && (extension.architectures != architectures)) {
+        throw GradleException("""
+          |If specifying architectures in the cocoapods configuration, is must be above the kotlin
+          |configuration:
+          |
+          |cocoapods {
+          |  architectures = ${extension.architectures}
+          |}
+          |
+          |kotlin {
+          |  ...
+          |}
+        """.trimMargin())
+      }
+
       project.tasks.register("generatePodspec", GeneratePodspecTask::class.java) { task ->
         task.group = GROUP
         task.description = "Generate a podspec file for this Kotlin Native project"
