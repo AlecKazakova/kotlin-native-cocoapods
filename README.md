@@ -76,7 +76,7 @@ By default this packages a fat binary with x64, arm64, and arm32 architectures i
 
 ```groovy
 kotlin {
-  targetForCocoapods([presets.iosArm64, iosX64], 'ios')
+  targetForCocoapods([presets.iosArm64, presets.iosX64], 'ios')
 }
 ```
 
@@ -85,7 +85,7 @@ Its also possible to use the full 1.3.20 DSL to customize the targets:
 
 ```groovy
 kotlin {
-  targetForCocoapods([presets.iosArm64, iosX64], 'ios') {
+  targetForCocoapods([presets.iosArm64, presets.iosX64], 'ios') {
     compilations.main.extraOpts '-module-name', 'CP'
   }
 }
