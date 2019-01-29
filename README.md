@@ -53,9 +53,9 @@ end
 
 And that's it! From your iOS project you will be able to `import common`.
 
-### Custom Preset
+### Custom Target
 
-The plugin also includes a custom preset which sets up the necessary x64/arm64 source sets:
+The plugin also includes a custom target which sets up the source sets:
 
 ```groovy
 kotlin {
