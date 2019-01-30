@@ -97,19 +97,11 @@ open class CocoapodsCompileTask : DefaultTask() {
         exec.args = listOf("-c", "Delete :CFBundleSupportedPlatforms:0", plistPath)
       }.rethrowFailure().assertNormalExitValue()
 
-      compilations.map { it.binary.target.konanTarget.supportedPlatform() }.distinct()
-          .forEachIndexed { index, platform ->
-            project.exec { exec ->
-              exec.executable = "/usr/libexec/PlistBuddy"
-              exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:$index string $platform", plistPath)
-            }.rethrowFailure().assertNormalExitValue()
-          }
+      // only add iPhoneOS as supported platform
+      project.exec { exec ->
+        exec.executable = "/usr/libexec/PlistBuddy"
+        exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:0 string iPhoneOS", plistPath)
+      }.rethrowFailure().assertNormalExitValue()
     }
-  }
-
-  private fun KonanTarget.supportedPlatform(): String = when (this) {
-    IOS_X64 -> "iPhoneOS"
-    IOS_ARM64, IOS_ARM32 -> "iPhoneSimulator"
-    else -> throw AssertionError()
   }
 }
