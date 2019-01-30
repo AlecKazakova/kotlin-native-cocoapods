@@ -90,6 +90,18 @@ open class CocoapodsCompileTask : DefaultTask() {
         exec.executable = "/usr/libexec/PlistBuddy"
         exec.args = listOf("-c", "Delete :UIRequiredDeviceCapabilities", plistPath)
       }.rethrowFailure().assertNormalExitValue().exitValue
+
+      // Clear supported platforms
+      project.exec { exec ->
+        exec.executable = "/usr/libexec/PlistBuddy"
+        exec.args = listOf("-c", "Delete :CFBundleSupportedPlatforms:0", plistPath)
+      }.rethrowFailure().assertNormalExitValue()
+
+      // only add iPhoneOS as supported platform
+      project.exec { exec ->
+        exec.executable = "/usr/libexec/PlistBuddy"
+        exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:0 string iPhoneOS", plistPath)
+      }.rethrowFailure().assertNormalExitValue()
     }
   }
 }
