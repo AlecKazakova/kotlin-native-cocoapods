@@ -67,7 +67,6 @@ class PluginTest {
     assertThat(plist.exists()).isTrue()
 
     assertThat(plist.readText()).apply {
-      contains("iPhoneSimulator")
       contains("iPhoneOS")
     }
 
@@ -96,7 +95,6 @@ class PluginTest {
     assertThat(plist.exists()).isTrue()
 
     assertThat(plist.readText()).apply {
-      contains("iPhoneSimulator")
       contains("iPhoneOS")
       doesNotContain("UIRequiredDeviceCapabilities")
     }
