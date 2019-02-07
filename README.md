@@ -41,10 +41,6 @@ The above command is assuming a module structure where `Code/Kotlin` is the root
 Then in your `Podfile` you can reference the module:
 
 ```ruby
-source 'https://git.sqcorp.co/scm/ios/cocoapodspecs.git'
-
-...
-
 target 'MyProject' do
   ...
   pod 'common', :path => 'Code/Kotlin/common'
