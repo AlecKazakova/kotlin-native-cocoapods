@@ -1,6 +1,11 @@
 Change Log
 ==========
 
+Version 0.3.1 *(2019-02-13)*
+----------------------------
+
+* Fix: Remove IphoneSimulator from generated plist
+
 Version 0.3.0 *(2019-01-29)*
 ----------------------------
 
