@@ -16,15 +16,19 @@ open class GeneratePodspecTask : DefaultTask() {
   var license: String? = null
   var summary: String? = null
   var daemon: Boolean = false
+  var wrapperExecutableName: String? = null
+  var wrapperAdditionalArgs: String? = null
 
   @TaskAction
   fun generatePodspec() {
+    val wrapperExecutableName = this.wrapperExecutableName ?: "gradlew"
+    val wrapperAdditionalArgs = wrapperAdditionalArgs ?: ""
     var current = project.projectDir
     var gradlew: String
     if (current == project.rootDir) {
-      gradlew = "./gradlew"
+      gradlew = "./$wrapperExecutableName"
     } else {
-      gradlew = "gradlew"
+      gradlew = wrapperExecutableName
       while (current != project.rootDir) {
         gradlew = "../$gradlew"
         current = current.parentFile
@@ -48,7 +52,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |
       |  spec.prepare_command = <<-SCRIPT
       |    set -ev
-      |    $gradlew ${if (daemon) "" else "--no-daemon" } -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace
+      |    $gradlew ${if (daemon) "" else "--no-daemon" } -P${InitializeFrameworkTask.FRAMEWORK_PROPERTY}=#{spec.name}.framework initializeFramework --stacktrace $wrapperAdditionalArgs
       |  SCRIPT
       |
       |  spec.script_phases = [
@@ -57,7 +61,7 @@ open class GeneratePodspecTask : DefaultTask() {
       |      :shell_path => '/bin/sh',
       |      :script => <<-SCRIPT
       |        set -ev
-      |        ${'$'}PODS_TARGET_SRCROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}PODS_TARGET_SRCROOT" "createIos${'$'}{CONFIGURATION}Artifacts"
+      |        ${'$'}PODS_TARGET_SRCROOT/$gradlew ${if (daemon) "" else "--no-daemon" } -p "${'$'}PODS_TARGET_SRCROOT" "createIos${'$'}{CONFIGURATION}Artifacts" $wrapperAdditionalArgs
       |      SCRIPT
       |    }
       |  ]

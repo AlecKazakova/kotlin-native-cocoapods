@@ -7,5 +7,7 @@ open class CocoapodsExtension(
   var authors: String? = null,
   var license: String? = null,
   var summary: String? = null,
-  var daemon: Boolean = false
+  var daemon: Boolean = false,
+  var wrapperExecutableName: String? = null,
+  var wrapperAdditionalArgs: String? = null
 )
