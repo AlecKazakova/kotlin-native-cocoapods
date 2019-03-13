@@ -1,19 +1,34 @@
 package com.alecstrong.cocoapods.gradle.plugin
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.Architecture
-import org.jetbrains.kotlin.konan.target.KonanTarget
-import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM32
-import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM64
-import org.jetbrains.kotlin.konan.target.KonanTarget.IOS_X64
 import java.io.File
 
 open class CocoapodsCompileTask : DefaultTask() {
-  internal lateinit var buildType: NativeBuildType
-  internal lateinit var compilations: Collection<KotlinNativeLink>
+  @InputFiles lateinit var inputs: FileCollection
+
+  @Input internal var buildType: NativeBuildType? = null
+    set(value) {
+      val outputs = mutableListOf("${project.buildDir.path}/${project.name}.framework")
+      if (hasDsyms()) outputs.add("${project.buildDir.path}/${project.name}.framework.dSYM")
+      outputDirectories = project.files(*outputs.toTypedArray())
+      field = value
+    }
+
+  @OutputDirectories lateinit var outputDirectories: FileCollection
+
+  internal var compilations: Collection<KotlinNativeLink> = emptyList()
+    set(value) {
+      inputs = project.files(*value.map { it.binary.outputFile }.toTypedArray())
+      field = value
+    }
 
   @TaskAction
   fun compileFatFramework() {
@@ -27,12 +42,16 @@ open class CocoapodsCompileTask : DefaultTask() {
   fun compileFatDsym() {
     // dsyms are not created for release builds, yet
     // https://github.com/JetBrains/kotlin-native/issues/2422
-    if (buildType != NativeBuildType.RELEASE) {
+    if (hasDsyms()) {
       compileFatBinary(
-              binaryPath = "Contents/Resources/DWARF/${project.name}",
-              bundleName = "${project.name}.framework.dSYM"
+          binaryPath = "Contents/Resources/DWARF/${project.name}",
+          bundleName = "${project.name}.framework.dSYM"
       )
     }
+  }
+
+  private fun hasDsyms(): Boolean {
+    return compilations.all { it.binary.debuggable }
   }
 
   private fun compileFatBinary(
