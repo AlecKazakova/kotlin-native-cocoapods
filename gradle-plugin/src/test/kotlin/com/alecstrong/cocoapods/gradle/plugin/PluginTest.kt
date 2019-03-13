@@ -136,4 +136,28 @@ class PluginTest {
               " This means no test task was added.")
         }
   }
+
+  @Test
+  fun `run createIosReleaseArtifacts with debugging turned on`() {
+    val fixtureName = "sample-override-framework"
+    val fixtureRoot = File("src/test/$fixtureName")
+    val runner = GradleRunner.create()
+        .withProjectDir(fixtureRoot)
+        .withPluginClasspath()
+        .forwardOutput()
+
+    val framework = File(fixtureRoot, "build/sample.framework").apply { deleteRecursively() }
+    val dsym = File(fixtureRoot, "build/sample.framework.dSYM").apply { deleteRecursively() }
+
+    runner.withArguments("createIosReleaseArtifacts", "--stacktrace", "--debug").build()
+
+    assertThat(framework.exists()).isTrue()
+    assertThat(dsym.exists()).isTrue()
+
+    val plist = File(dsym, "Contents/Info.plist")
+    assertThat(plist.exists()).isTrue()
+
+    framework.deleteRecursively()
+    dsym.deleteRecursively()
+  }
 }
