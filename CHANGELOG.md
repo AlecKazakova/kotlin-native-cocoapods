@@ -1,6 +1,12 @@
 Change Log
 ==========
 
+Version 0.3.2 *(2019-03-13)*
+----------------------------
+
+* Fix: Bundle dSYM's for release builds that supply the "-g" compiler arg
+* Fix: Make the lipo task incremental
+
 Version 0.3.1 *(2019-02-13)*
 ----------------------------
 
