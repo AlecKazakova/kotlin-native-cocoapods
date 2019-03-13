@@ -51,13 +51,14 @@ open class CocoapodsCompileTask : DefaultTask() {
   }
 
   private fun hasDsyms(): Boolean {
-    return compilations.all { it.binary.debuggable }
+    return compilations.all { it.binary.debuggable || it.binary.freeCompilerArgs.contains("-g") }
   }
 
   private fun compileFatBinary(
     binaryPath: String,
     bundleName: String
   ) {
+    logger.debug("Creating fat binary for $binaryPath $bundleName")
     val finalContainerPath = "${project.buildDir.path}/$bundleName"
     val finalOutputPath =  "$finalContainerPath/$binaryPath"
 
@@ -75,6 +76,7 @@ open class CocoapodsCompileTask : DefaultTask() {
           deviceParentDir = output
         }
 
+        logger.debug("Lipo'ing for arch ${target.architecture} with path $output/$bundleName/$binaryPath")
         args.addAll(listOf(
             "-arch", target.architecture(), "$output/$bundleName/$binaryPath"
         ))
