@@ -27,6 +27,8 @@ cocoapods {
   license = "..." // Defaults to empty
   summary = "..." // Defaults to empty
   daemon = true // Defaults to false
+  wrapperExecutableName = "gradlew" // Defaults to "gradlew"
+  wrapperAdditionalArgs = "..." // Defaults to empty
 }
 ```
 

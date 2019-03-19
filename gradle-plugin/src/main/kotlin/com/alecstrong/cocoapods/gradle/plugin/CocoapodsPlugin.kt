@@ -27,6 +27,8 @@ open class CocoapodsPlugin : Plugin<Project> {
         task.license = extension.license
         task.summary = extension.summary
         task.daemon = extension.daemon
+        task.wrapperExecutableName = extension.wrapperExecutableName
+        task.wrapperAdditionalArgs = extension.wrapperAdditionalArgs
       }
 
       project.tasks.register("initializeFramework", InitializeFrameworkTask::class.java) { task ->
