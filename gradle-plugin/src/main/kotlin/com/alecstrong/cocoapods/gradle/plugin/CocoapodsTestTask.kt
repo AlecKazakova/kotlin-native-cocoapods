@@ -14,7 +14,7 @@ open class CocoapodsTestTask : DefaultTask() {
 
   @TaskAction
   fun performTest() {
-    val binary = target.compilations.getByName("test").getBinary(EXECUTABLE, DEBUG)
+    val binary = target.binaries.findExecutable("test", DEBUG)!!.outputFile
     project.exec { exec ->
       exec.commandLine("xcrun", "simctl", "spawn", device, binary.absolutePath)
     }
