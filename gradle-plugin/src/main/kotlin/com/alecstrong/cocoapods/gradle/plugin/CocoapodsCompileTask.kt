@@ -1,11 +1,14 @@
 package com.alecstrong.cocoapods.gradle.plugin
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecSpec
+import org.gradle.process.internal.ExecException
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeLink
 import org.jetbrains.kotlin.konan.target.Architecture
@@ -109,16 +112,16 @@ open class CocoapodsCompileTask : DefaultTask() {
     // clean plist (only works for frameworks)
     val plistPath = "$finalContainerPath/Info.plist"
     if (File(plistPath).exists()) {
-      project.exec { exec ->
+      project.tryExec { exec ->
         exec.executable = "/usr/libexec/PlistBuddy"
         exec.args = listOf("-c", "Delete :UIRequiredDeviceCapabilities", plistPath)
-      }.rethrowFailure().assertNormalExitValue().exitValue
+      }
 
       // Clear supported platforms
-      project.exec { exec ->
+      project.tryExec { exec ->
         exec.executable = "/usr/libexec/PlistBuddy"
         exec.args = listOf("-c", "Delete :CFBundleSupportedPlatforms:0", plistPath)
-      }.rethrowFailure().assertNormalExitValue()
+      }
 
       // only add iPhoneOS as supported platform
       project.exec { exec ->
@@ -126,5 +129,12 @@ open class CocoapodsCompileTask : DefaultTask() {
         exec.args = listOf("-c", "Add :CFBundleSupportedPlatforms:0 string iPhoneOS", plistPath)
       }.rethrowFailure().assertNormalExitValue()
     }
+  }
+
+  private fun Project.tryExec(action: (ExecSpec) -> Unit) = try {
+    exec(action::invoke).exitValue
+  } catch (exc: ExecException) {
+    logger.info("Silent error: ${exc.message}")
+    exc.printStackTrace()
   }
 }
