@@ -14,6 +14,7 @@ import java.io.File
 open class CocoapodsCompileTask : DefaultTask() {
   @InputFiles lateinit var inputs: FileCollection
 
+  @Input internal lateinit var buildDeviceArchTarget: Architecture
   @Input internal var buildType: NativeBuildType? = null
     set(value) {
       val outputs = mutableListOf("${project.buildDir.path}/${project.name}.framework")
@@ -58,7 +59,7 @@ open class CocoapodsCompileTask : DefaultTask() {
     binaryPath: String,
     bundleName: String
   ) {
-    logger.debug("Creating fat binary for $binaryPath $bundleName")
+    logger.info("Creating fat binary for $binaryPath $bundleName")
     val finalContainerPath = "${project.buildDir.path}/$bundleName"
     val finalOutputPath =  "$finalContainerPath/$binaryPath"
 
@@ -72,11 +73,12 @@ open class CocoapodsCompileTask : DefaultTask() {
       compilations.forEach { compilation ->
         val output = compilation.outputFile.get().parentFile.absolutePath
         val target = compilation.binary.target.konanTarget
-        if (target.architecture == Architecture.ARM64) {
+        if (target.architecture == buildDeviceArchTarget) {
+          logger.info("Selected device arch target: ${target.architecture}")
           deviceParentDir = output
         }
 
-        logger.debug("Lipo'ing for arch ${target.architecture} with path $output/$bundleName/$binaryPath")
+        logger.info("Lipo'ing for arch ${target.architecture} with path $output/$bundleName/$binaryPath")
         args.addAll(listOf(
             "-arch", target.architecture(), "$output/$bundleName/$binaryPath"
         ))

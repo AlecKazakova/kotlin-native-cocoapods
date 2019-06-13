@@ -49,6 +49,7 @@ open class CocoapodsPlugin : Plugin<Project> {
                 CocoapodsCompileTask::class.java
             ) { task ->
               task.dependsOn(compilations)
+              task.buildDeviceArchTarget = extension.buildDeviceArchTarget
               task.buildType = buildType
               task.compilations = compilations
               task.group = GROUP
