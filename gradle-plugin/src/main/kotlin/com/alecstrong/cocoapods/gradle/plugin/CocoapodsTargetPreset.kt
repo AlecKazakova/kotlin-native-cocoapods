@@ -34,7 +34,7 @@ class CocoapodsTargetPreset(
 
     if (simulator != null) {
       project.tasks.register("${name}Test", CocoapodsTestTask::class.java) { task ->
-        task.dependsOn(simulator.binaries.getExecutable("test", DEBUG).linkTask)
+        task.dependsOn(simulator.binaries.getTest("DEBUG").linkTask)
         task.group = CocoapodsPlugin.GROUP
         task.description = "Run tests for target '$name' on an iOS Simulator"
         task.target = simulator
